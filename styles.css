@@ -1,0 +1,609 @@
+/* =========================================================================
+   THE HANGER — styles.css
+   Design tokens + custom styles that go beyond what Tailwind utility
+   classes conveniently cover (fonts, carousel/swipe mechanics, motion).
+   Tailwind (loaded via CDN in index.html) handles most layout/spacing;
+   this file defines the look and feel that makes it "The Hanger".
+   ========================================================================= */
+
+/* ---- Fonts ------------------------------------------------------------ */
+/* Fraunces: a warm, characterful serif used for headings/wordmark.
+   Manrope: a clean geometric sans used for body text and UI labels. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+/* ---- Design tokens ------------------------------------------------------
+   Colour palette (named, not defaults):
+   --ink        deep warm espresso — primary text
+   --ink-soft   softened ink — secondary text
+   --paper      the off-white background
+   --card       card surface, a hair lighter than paper
+   --line       hairline borders on paper
+   --clay       dusty rose-clay accent — primary brand accent
+   --clay-deep  deeper clay for pressed/active states
+   --sage       muted sage — secondary accent (worn sparingly)
+   --gold       soft antique gold — highlights, favourites, the hook motif
+------------------------------------------------------------------------- */
+:root {
+  --ink: #2a231d;
+  --ink-soft: #6b6156;
+  --paper: #faf6f0;
+  --card: #ffffff;
+  --line: #ece4d8;
+  --clay: #c48b7f;
+  --clay-deep: #a96e63;
+  --sage: #8a9a7e;
+  --gold: #c7a15a;
+
+  --shadow-card: 0 10px 30px -12px rgba(42, 35, 29, 0.18);
+  --shadow-soft: 0 4px 14px -6px rgba(42, 35, 29, 0.12);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Defined locally (not just relied on from the Tailwind CDN utility) so
+   that switching between the five main views still works correctly even
+   if the Tailwind CDN script is ever slow, blocked, or unavailable
+   offline before the service worker has cached it. */
+.hidden {
+  display: none !important;
+}
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  overscroll-behavior-y: none;
+}
+
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+/* Respect reduced-motion preferences throughout the app */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---- App shell ---------------------------------------------------------*/
+#app-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--paper);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  #app-shell {
+    max-width: 640px;
+    box-shadow: var(--shadow-card);
+    min-height: 100dvh;
+  }
+}
+
+@media (min-width: 1100px) {
+  #app-shell {
+    max-width: 880px;
+  }
+  .builder-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+main {
+  flex: 1 1 auto;
+  padding-bottom: 96px; /* clears the bottom nav */
+}
+
+/* ---- Bottom navigation ---------------------------------------------- */
+#bottom-nav {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(250, 246, 240, 0.92);
+  backdrop-filter: saturate(160%) blur(14px);
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+  z-index: 40;
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.nav-btn .nav-icon {
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.nav-btn.active {
+  color: var(--clay-deep);
+}
+
+.nav-btn.active .nav-icon {
+  transform: translateY(-2px) scale(1.08);
+}
+
+.nav-btn:active {
+  transform: scale(0.94);
+}
+
+/* ---- Top header ------------------------------------------------------ */
+.app-header {
+  padding: 22px 20px 14px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(to bottom, var(--paper) 75%, rgba(250,246,240,0));
+  z-index: 30;
+}
+
+.wordmark {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.wordmark .hook-dot {
+  color: var(--gold);
+}
+
+/* ---- Cards ------------------------------------------------------------*/
+.card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--line);
+}
+
+.pill {
+  border-radius: 999px;
+}
+
+/* ---- Carousel (Outfit Builder) --------------------------------------- */
+.category-block {
+  padding: 18px 20px 6px;
+}
+
+.category-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+
+.carousel-stage {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  touch-action: pan-y;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.carousel-track.dragging {
+  transition: none;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  background: #fbfaf7;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 14px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--ink);
+  box-shadow: var(--shadow-soft);
+  z-index: 10;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.carousel-arrow.left { left: 10px; }
+.carousel-arrow.right { right: 10px; }
+
+.carousel-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 16px 4px;
+  text-align: center;
+}
+
+.carousel-item-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.carousel-item-count {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.dot-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 0 14px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: all 0.25s ease;
+}
+
+.dot.active {
+  background: var(--clay);
+  width: 16px;
+  border-radius: 4px;
+}
+
+/* ---- Empty states ------------------------------------------------------*/
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 36px 24px;
+  aspect-ratio: 1 / 1;
+}
+
+.empty-state .empty-emoji {
+  font-size: 34px;
+  opacity: 0.7;
+}
+
+/* ---- Buttons ------------------------------------------------------------*/
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  border-radius: 999px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+
+.btn-accent {
+  background: var(--clay);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn-accent:active { transform: scale(0.97); opacity: 0.9; }
+
+.btn-ghost {
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn-ghost:active { transform: scale(0.97); }
+
+.btn-danger {
+  background: #fdf0ee;
+  color: #a13d30;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid #f3d4cd;
+}
+
+/* ---- Wardrobe grid ------------------------------------------------------*/
+.wardrobe-card {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease;
+}
+.wardrobe-card:active { transform: scale(0.97); }
+
+.wardrobe-card .thumb {
+  aspect-ratio: 1 / 1;
+  background: #fbfaf7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.wardrobe-card .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: var(--card);
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+.chip.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* ---- Modal / sheet ------------------------------------------------------*/
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 25, 20, 0.42);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.sheet-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--paper);
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+  max-height: 92dvh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 91;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 768px) {
+  .sheet { max-width: 640px; }
+}
+@media (min-width: 1100px) {
+  .sheet { max-width: 880px; }
+}
+
+.sheet.open {
+  transform: translateY(0);
+}
+
+.sheet-handle {
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--line);
+  margin: 10px auto 4px;
+}
+
+/* ---- Form fields ------------------------------------------------------*/
+.field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.field-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--ink);
+  font-family: 'Manrope', sans-serif;
+}
+
+.field-input:focus, .chip:focus-visible, .btn-primary:focus-visible,
+.btn-accent:focus-visible, .btn-ghost:focus-visible, .nav-btn:focus-visible,
+.carousel-arrow:focus-visible {
+  outline: 2px solid var(--clay-deep);
+  outline-offset: 2px;
+}
+
+/* ---- Toast -------------------------------------------------------------*/
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 100px;
+  transform: translate(-50%, 12px);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 200;
+  max-width: 86%;
+  text-align: center;
+}
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---- Saved outfit mini-cards ------------------------------------------*/
+.outfit-triptych {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  padding: 14px;
+  background: #fbfaf7;
+}
+.outfit-triptych .slot {
+  aspect-ratio: 1 / 1;
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.outfit-triptych .slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+.outfit-triptych .slot.empty {
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+/* ---- Week planner ------------------------------------------------------*/
+.day-card {
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.day-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.day-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.day-name .day-sub {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: block;
+}
+
+/* ---- Animations ---------------------------------------------------------*/
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes shuffle-pulse {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(0.94) rotate(-2deg); }
+  60% { transform: scale(1.03) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.shuffle-anim {
+  animation: shuffle-pulse 0.5s ease;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.spin-slow {
+  animation: spin-slow 1.1s linear infinite;
+}
+
+/* Section fade-in when switching tabs */
+.view-enter {
+  animation: fade-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Scrollbar tidy-up (webkit) */
+::-webkit-scrollbar { width: 0px; height: 0px; }

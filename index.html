@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>The Hanger — Outfit Decider &amp; Wardrobe Planner</title>
+<meta name="description" content="Photograph your wardrobe, build outfits visually, and plan your week — all stored privately on your device.">
+
+<!-- ===================== PWA / Home Screen setup ===================== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#faf6f0">
+
+<!-- Apple-specific tags so this behaves like a real app when added to the
+     iPhone/iPad Home Screen (Safari does not read manifest.json for all
+     of this, so these tags are required in addition to the manifest). -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Hanger">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png" type="image/png">
+
+<!-- ===================== Tailwind CSS via CDN =========================
+     Tailwind's CDN build ("Play CDN") needs no build step or npm install
+     — it compiles utility classes in the browser at runtime, which is
+     exactly what a no-build, upload-to-GitHub-Pages project needs. -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Extend Tailwind with The Hanger's own colour + font tokens so we can
+  // use classes like `text-[var(--ink)]` consistently. Most fine-grained
+  // visual design still lives in styles.css.
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Manrope', 'system-ui', 'sans-serif']
+        }
+      }
+    }
+  };
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- ============================= HEADER ============================= -->
+  <header class="app-header">
+    <div class="wordmark">The Hanger<span class="hook-dot">.</span></div>
+  </header>
+
+  <!-- ============================= MAIN VIEWS ==========================
+       All five sections exist in the DOM at once; switchView() in app.js
+       just shows/hides them and re-renders the one being shown. Keeping
+       them all mounted (rather than rebuilding the whole page) keeps
+       navigation instant. -->
+  <main>
+    <section id="view-builder" class="view-panel"></section>
+    <section id="view-wardrobe" class="view-panel hidden"></section>
+    <section id="view-saved" class="view-panel hidden"></section>
+    <section id="view-week" class="view-panel hidden"></section>
+    <section id="view-settings" class="view-panel hidden"></section>
+  </main>
+
+  <!-- ============================= BOTTOM NAV ========================== -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-action="nav" data-view="builder">
+      <span class="nav-icon">👗</span><span>Build</span>
+    </button>
+    <button class="nav-btn" data-action="nav" data-view="wardrobe">
+      <span class="nav-icon">🧺</span><span>Wardrobe</span>
+    </button>
+    <button class="nav-btn" data-action="nav" data-view="saved">
+      <span class="nav-icon">❤️</span><span>Saved</span>
+    </button>
+    <button class="nav-btn" data-action="nav" data-view="week">
+      <span class="nav-icon">🗓</span><span>Week</span>
+    </button>
+    <button class="nav-btn" data-action="nav" data-view="settings">
+      <span class="nav-icon">⚙️</span><span>Settings</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ============================= SHEET (MODAL) =========================
+     One reusable bottom sheet, filled in dynamically by app.js for every
+     form/dialog in the app (add/edit clothing, save outfit, choose a
+     day, confirmations, etc). -->
+<div id="sheet-backdrop" class="sheet-backdrop"></div>
+<div id="sheet" class="sheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <div id="sheet-content" class="p-5"></div>
+</div>
+
+<!-- ============================= TOAST ================================ -->
+<div id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
